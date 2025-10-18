@@ -1,0 +1,21 @@
+@page
+@model PIMIV.Pages.Tickets.DeleteModel
+@{
+    ViewData["Title"] = "Excluir Ticket";
+}
+<h2 class="mb-3 text-danger">Excluir Ticket</h2>
+<div class="alert alert-warning">Tem certeza que deseja excluir este ticket?</div>
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Título</dt>
+            <dd class="col-sm-9">@Model.Ticket.Titulo</dd>
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9">@Model.Ticket.Descricao</dd>
+        </dl>
+    </div>
+</div>
+<form method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i> Excluir</button>
+    <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>

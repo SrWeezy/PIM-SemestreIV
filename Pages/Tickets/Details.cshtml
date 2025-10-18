@@ -1,0 +1,26 @@
+@page
+@model PIMIV.Pages.Tickets.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes do Ticket";
+}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Detalhes do Ticket</h2>
+    <div class="d-flex gap-2">
+        <a asp-page="Edit" asp-route-id="@Model.Ticket?.Id" class="btn btn-warning"><i class="bi bi-pencil me-1"></i> Editar</a>
+        <a asp-page="Index" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Título</dt>
+            <dd class="col-sm-9">@Model.Ticket?.Titulo</dd>
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9">@Model.Ticket?.Descricao</dd>
+            <dt class="col-sm-3">Aberto em</dt>
+            <dd class="col-sm-9">@Model.Ticket?.DataAbertura.ToString("dd/MM/yyyy")</dd>
+            <dt class="col-sm-3">Usuário</dt>
+            <dd class="col-sm-9">@Model.Ticket?.Usuario?.Nome</dd>
+        </dl>
+    </div>
+</div>

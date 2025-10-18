@@ -1,0 +1,38 @@
+@page
+@model PIMIV.Pages.Tickets.EditModel
+@{
+    ViewData["Title"] = "Editar Ticket";
+}
+<h2 class="mb-3">Editar Ticket</h2>
+<form method="post">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Ticket.Titulo" class="form-label"></label>
+                        <input asp-for="Ticket.Titulo" class="form-control" placeholder="Resumo do problema">
+                        <span asp-validation-for="Ticket.Titulo" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Ticket.Descricao" class="form-label"></label>
+                        <textarea asp-for="Ticket.Descricao" class="form-control" rows="5" placeholder="Descreva o problema"></textarea>
+                        <span asp-validation-for="Ticket.Descricao" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Ticket.UsuarioId" class="form-label">Usuário</label>
+                        <select asp-for="Ticket.UsuarioId" class="form-select" asp-items="ViewBag.UsuarioId"></select>
+                        <span asp-validation-for="Ticket.UsuarioId" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+                        <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

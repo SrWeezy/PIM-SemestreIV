@@ -1,0 +1,19 @@
+@page
+@model PIMIV.Pages.Usuarios.DetailsModel
+@{
+    ViewData["Title"] = "Detalhes do Usuário";
+}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Detalhes do Usuário</h2>
+    <a asp-page="Index" class="btn btn-outline-secondary">Voltar</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Usuario.Nome</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Usuario.Email</dd>
+        </dl>
+    </div>
+</div>
