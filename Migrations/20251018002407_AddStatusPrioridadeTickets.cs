@@ -4,10 +4,8 @@
 
 namespace PIMIV.Migrations
 {
-    /// <inheritdoc />
     public partial class AddStatusPrioridadeTickets : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -42,8 +40,6 @@ namespace PIMIV.Migrations
                 nullable: false,
                 defaultValue: 0);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
