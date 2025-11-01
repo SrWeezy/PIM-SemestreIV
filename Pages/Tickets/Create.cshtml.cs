@@ -10,6 +10,7 @@ using PIMIV.Models;
 
 namespace PIMIV.Pages.Tickets
 {
+
     public class CreateModel : PageModel
     {
         private readonly PIMIV.Data.ApplicationDbContext _context;

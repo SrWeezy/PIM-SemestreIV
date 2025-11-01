@@ -3,24 +3,71 @@
 @{
     ViewData["Title"] = "Detalhes do Ticket";
 }
+
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="mb-0">Detalhes do Ticket</h2>
     <div class="d-flex gap-2">
-        <a asp-page="Edit" asp-route-id="@Model.Ticket?.Id" class="btn btn-warning"><i class="bi bi-pencil me-1"></i> Editar</a>
+        <a asp-page="Edit" asp-route-id="@Model.Ticket?.Id" class="btn btn-warning">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
         <a asp-page="Index" class="btn btn-outline-secondary">Voltar</a>
     </div>
 </div>
-<div class="card shadow-sm">
+
+<div class="card shadow-sm mb-3">
     <div class="card-body">
         <dl class="row mb-0">
             <dt class="col-sm-3">Título</dt>
             <dd class="col-sm-9">@Model.Ticket?.Titulo</dd>
+
             <dt class="col-sm-3">Descrição</dt>
             <dd class="col-sm-9">@Model.Ticket?.Descricao</dd>
+
             <dt class="col-sm-3">Aberto em</dt>
             <dd class="col-sm-9">@Model.Ticket?.DataAbertura.ToString("dd/MM/yyyy")</dd>
+
             <dt class="col-sm-3">Usuário</dt>
             <dd class="col-sm-9">@Model.Ticket?.Usuario?.Nome</dd>
         </dl>
     </div>
 </div>
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Resposta da IA</strong>
+        <button id="btnIa" type="button" class="btn btn-sm btn-primary">
+            <i class="bi bi-robot me-1"></i> Gerar resposta com IA
+        </button>
+    </div>
+    <div class="card-body">
+        <pre id="iaText" class="mb-0" style="white-space: pre-wrap;">@Model.Ticket?.RespostaIA</pre>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const btnIa = document.getElementById('btnIa');
+        const preIa = document.getElementById('iaText');
+
+        btnIa?.addEventListener('click', async () => {
+            btnIa.disabled = true;
+            btnIa.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando...';
+            preIa.textContent = 'Gerando resposta da IA...';
+
+            try {
+                const response = await fetch('/api/ticketsapi/@Model.Ticket?.Id/responder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                preIa.textContent = data.respostaIA || 'A IA não retornou uma resposta.';
+            } catch (err) {
+                preIa.textContent = 'Erro ao consultar a IA.';
+            } finally {
+                btnIa.disabled = false;
+                btnIa.innerHTML = '<i class="bi bi-robot me-1"></i> Gerar resposta com IA';
+            }
+        });
+    </script>
+}
