@@ -46,13 +46,13 @@ namespace PIMIV.Controllers
                 if (!existe) return BadRequest("UsuarioId inválido — usuário não encontrado.");
             }
 
-            ticket.DataAbertura = DateTime.Now;
+            ticket.DataAbertura = DateTime.UtcNow;
             _context.Tickets.Add(ticket);
-            await _context.SaveChangesAsync();
 
             var respostaIa = await ObterRespostaIA(ticket.Titulo, ticket.Descricao);
 
             ticket.RespostaIA = respostaIa;
+            ticket.Status = TicketStatus.Fechado;
             await _context.SaveChangesAsync();
 
             return Ok(new { Mensagem = "Ticket aberto com sucesso!", Ticket = ticket, RespostaIA = respostaIa });
@@ -66,6 +66,7 @@ namespace PIMIV.Controllers
 
             var respostaIa = await ObterRespostaIA(ticket.Titulo, ticket.Descricao);
             ticket.RespostaIA = respostaIa;
+            ticket.Status = TicketStatus.Fechado;
             await _context.SaveChangesAsync();
 
             return Ok(new { Mensagem = "Resposta da IA atualizada com sucesso!", TicketId = ticket.Id, RespostaIA = respostaIa });

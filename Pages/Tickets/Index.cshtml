@@ -4,11 +4,80 @@
     ViewData["Title"] = "Tickets";
 }
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="mb-0">Tickets</h2>
-    <div class="d-flex gap-2">
-        <a asp-page="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i> Novo Ticket</a>
-        <a asp-page="/Login" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right me-1"></i> Sair</a>
+<section class="hero-panel mb-4">
+    <div class="bg-white border rounded-4 shadow-sm p-4 p-lg-5 position-relative overflow-hidden">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="badge rounded-pill text-bg-primary-subtle text-primary mb-3">
+                    <i class="bi bi-robot me-2"></i>Suporte automatizado com IA
+                </span>
+                <h1 class="display-6 fw-semibold mb-3">Histórico de chamados AjudAI</h1>
+                <p class="lead text-muted mb-4">
+                    Visualize como a IA resolve os chamados técnicos do projeto PIM IV, acompanhe a geração automática de respostas e mantenha o histórico acadêmico organizado sem depender de uma equipe de atendimento.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-page="Create" class="btn btn-primary btn-lg shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i> Novo ticket
+                    </a>
+                    <a href="#lista-tickets" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-clock-history me-2"></i> Ver histórico de interações
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="hero-stats text-center text-lg-start">
+                    <p class="text-uppercase text-muted mb-2 small">Resumo automatizado</p>
+                    <h2 class="fw-semibold mb-1">@Model.TotalTickets.ToString("N0") chamados</h2>
+                    <p class="text-muted mb-0">@Model.PercentualRespondidos.ToString("N1")% finalizados automaticamente</p>
+                </div>
+            </div>
+        </div>
+        <div class="hero-accent"></div>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="metric-card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-uppercase small text-muted mb-1">Aguardando IA</p>
+                    <h4 class="fw-semibold mb-0">@Model.TicketsPendentes</h4>
+                </div>
+                <span class="metric-icon text-primary bg-primary-subtle">
+                    <i class="bi bi-inbox"></i>
+                </span>
+            </div>
+            <small class="text-muted">Chamados ainda sem resposta automática registrada.</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-uppercase small text-muted mb-1">Finalizados</p>
+                    <h4 class="fw-semibold mb-0">@Model.TicketsFechados</h4>
+                </div>
+                <span class="metric-icon text-success bg-success-subtle">
+                    <i class="bi bi-check2-circle"></i>
+                </span>
+            </div>
+            <small class="text-muted">Chamados concluídos após resposta da IA.</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-uppercase small text-muted mb-1">Usuários atendidos</p>
+                    <h4 class="fw-semibold mb-0">@Model.UsuariosAtendidos</h4>
+                </div>
+                <span class="metric-icon text-info bg-info-subtle">
+                    <i class="bi bi-people"></i>
+                </span>
+            </div>
+            <small class="text-muted">Quantidade de usuários únicos com chamados resolvidos.</small>
+        </div>
     </div>
 </div>
 
@@ -25,14 +94,14 @@
 }
 else
 {
-    <div class="card shadow-sm">
+    <div id="lista-tickets" class="card shadow-sm border-0 rounded-4">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead class="table-light text-muted text-uppercase small">
                     <tr>
                         <th style="width:35%">Título</th>
                         <th style="width:35%">Descrição</th>
-                        <th style="width:15%">Aberto em</th>
+                        <th style="width:15%">Gerado em</th>
                         <th style="width:10%">Usuário</th>
                         <th style="width:5%" class="text-end">Ações</th>
                     </tr>
@@ -48,9 +117,17 @@ else
                             <td>@item.DataAbertura.ToString("dd/MM/yyyy")</td>
                             <td>@(item.Usuario?.Nome ?? "-")</td>
                             <td class="text-end">
-                                <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info"><i class="bi bi-search"></i></a>
-                                <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
-                                <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Ações do ticket">
+                                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Detalhes">
+                                        <i class="bi bi-search"></i>
+                                    </a>
+                                    <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -60,14 +137,44 @@ else
     </div>
 }
 
-@section Scripts {
+@section Styles {
     <style>
-        .table-hover tbody tr:hover {
-            background: rgba(13,110,253,.06);
+        .hero-panel .hero-accent {
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle at center, rgba(13, 110, 253, 0.25), rgba(13, 110, 253, 0));
+            z-index: 0;
         }
 
-        .card {
-            border-radius: 14px;
+        .hero-panel .bg-white {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card {
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        .metric-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            font-size: 1.25rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+
+        .btn-group .btn {
+            border-width: 1px;
         }
     </style>
 }
