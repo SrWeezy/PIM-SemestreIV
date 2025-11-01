@@ -1,0 +1,96 @@
+@page
+@model PIMIV.Pages.LoginModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Login";
+}
+
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4 p-md-5">
+
+        <div class="text-center mb-4">
+            <div class="icon-login mb-3 mx-auto">
+                <i class="bi bi-headset"></i>
+            </div>
+            <h2 class="fw-bold mb-1">AjudAI</h2>
+            <p class="text-secondary small mb-0">Sistema de abertura de chamados com IA</p>
+        </div>
+
+        <ul class="nav nav-pills nav-justified mb-4">
+            <li class="nav-item">
+                <button class="nav-link @(Model.ActiveTab == "login" ? "active" : "")" data-bs-toggle="tab" data-bs-target="#tab-login" type="button">Entrar</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(Model.ActiveTab == "cadastro" ? "active" : "")" data-bs-toggle="tab" data-bs-target="#tab-cadastro" type="button">Cadastrar</button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade @(Model.ActiveTab == "login" ? "show active" : "")" id="tab-login">
+                @if (!string.IsNullOrEmpty(Model.Mensagem))
+                {
+                    <div class="alert alert-danger py-2">@Model.Mensagem</div>
+                }
+                <form method="post" asp-page-handler="Entrar">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="seu@email.com" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Senha</label>
+                        <div class="input-group">
+                            <input asp-for="Senha" id="senha" type="password" class="form-control" placeholder="••••••" required />
+                            <button class="btn btn-outline-secondary" type="button" id="toggleSenha"><i class="bi bi-eye"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                    </button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade @(Model.ActiveTab == "cadastro" ? "show active" : "")" id="tab-cadastro">
+                @if (!string.IsNullOrEmpty(Model.MensagemCadastro))
+                {
+                    <div class="alert alert-danger py-2">@Model.MensagemCadastro</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SucessoCadastro))
+                {
+                    <div class="alert alert-success py-2">@Model.SucessoCadastro</div>
+                }
+                <form method="post" asp-page-handler="Cadastrar">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input asp-for="NomeCadastro" class="form-control" placeholder="Seu nome" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input asp-for="EmailCadastro" type="email" class="form-control" placeholder="seu@email.com" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Senha</label>
+                        <input asp-for="SenhaCadastro" type="password" class="form-control" placeholder="Crie uma senha" required />
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-person-plus me-1"></i> Cadastrar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const senha = document.getElementById('senha');
+        const toggle = document.getElementById('toggleSenha');
+        if (toggle && senha){
+          toggle.addEventListener('click', () => {
+            const show = senha.type === 'password';
+            senha.type = show ? 'text' : 'password';
+            toggle.innerHTML = show ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+          });
+        }
+    </script>
+}
