@@ -104,6 +104,24 @@
 
             let currentTicketId = null;
 
+             const updateIaOverflowState = ({ forceHideToggle = false } = {}) => {
+                if (!iaResponseBox) return;
+
+                const isExpanded = iaResponseBox.classList.contains('expanded');
+                const hasOverflow = iaResponseBox.scrollHeight - iaResponseBox.clientHeight > 1;
+
+                iaResponseBox.classList.toggle('clamped', hasOverflow && !isExpanded);
+
+                if (iaExpandToggle) {
+                    const shouldHide = forceHideToggle || !hasOverflow;
+                    iaExpandToggle.classList.toggle('d-none', shouldHide);
+                    iaExpandToggle.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                    iaExpandToggle.innerHTML = isExpanded
+                        ? '<i class="bi bi-arrows-angle-contract me-1"></i>Recolher resposta'
+                        : '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+                }
+            };
+
             const showAlert = (message, type = 'danger') => {
                 alertPlaceholder.innerHTML = `
                     <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -127,7 +145,7 @@
                 iaStatus.className = 'alert alert-info mb-3';
                 iaLoading.classList.add('d-none');
                 iaResponse.classList.add('d-none');
-                iaResponseBox?.classList.remove('expanded');
+                iaResponseBox?.classList.remove('expanded', 'clamped');
                 iaResponseText.textContent = '';
                 iaMeta.classList.add('d-none');
                 iaMeta.textContent = '';
@@ -138,6 +156,7 @@
                     iaExpandToggle.setAttribute('aria-expanded', 'false');
                     iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
                 }
+                updateIaOverflowState({ forceHideToggle: true });
                 if (generateButton) {
                     generateButton.disabled = true;
                 }
@@ -266,13 +285,9 @@
                     iaStatus.className = 'alert alert-info mb-3';
                     iaStatus.textContent = 'Consultando a IA, aguarde alguns instantes...';
                     iaResponse.classList.add('d-none');
-                    iaResponseBox?.classList.remove('expanded');
+                    iaResponseBox?.classList.remove('expanded', 'clamped');
                     iaResponseText.textContent = '';
-                    if (iaExpandToggle) {
-                        iaExpandToggle.classList.add('d-none');
-                        iaExpandToggle.setAttribute('aria-expanded', 'false');
-                        iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
-                    }
+                    updateIaOverflowState({ forceHideToggle: true });
                     iaLoading.classList.remove('d-none');
                     toggleGenerateLoading(true);
 
@@ -292,15 +307,10 @@
                         const respostaIa = (data?.respostaIA ?? '').trim();
                         iaLoading.classList.add('d-none');
                         iaResponse.classList.remove('d-none');
-                        iaResponseBox?.classList.remove('expanded');
+                        iaResponseBox?.classList.remove('expanded', 'clamped');
                         iaResponseText.textContent = respostaIa || 'A IA não retornou uma sugestão. Tente novamente em alguns instantes.';
-
-                        if (iaExpandToggle) {
-                            iaExpandToggle.classList.toggle('d-none', !respostaIa);
-                            iaExpandToggle.setAttribute('aria-expanded', 'false');
-                            iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
-                        }
-
+                        requestAnimationFrame(() => updateIaOverflowState({ forceHideToggle: !respostaIa }));
+                        
                         iaStatus.className = 'alert alert-success mb-3';
                         iaStatus.textContent = 'Resposta gerada com sucesso!';
 
@@ -317,6 +327,7 @@
                         iaResponseText.textContent = '';
                         iaStatus.className = 'alert alert-danger mb-3';
                         iaStatus.textContent = error.message || 'Erro inesperado ao gerar a resposta da IA.';
+                        updateIaOverflowState({ forceHideToggle: true });
                     } finally {
                         toggleGenerateLoading(false);
                     }
@@ -326,35 +337,18 @@
                 if (!iaResponseBox) return;
 
                 const expanded = iaResponseBox.classList.toggle('expanded');
-                iaExpandToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-                iaExpandToggle.innerHTML = expanded
-                    ? '<i class="bi bi-arrows-angle-contract me-1"></i>Recolher resposta'
-                    : '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+                updateIaOverflowState();
 
-                if (expanded) {
-                    iaResponseBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                requestAnimationFrame(() => {
+                    if (expanded) {
+                        iaResponseBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                requestAnimationFrame(() => updateIaOverflowState());
             });
         });
     </script>
-}
-
-@section Styles {
-    <style>
-        .ia-response-box {
-            background-color: #f8f9fa;
-            border: 1px solid var(--bs-border-color, #dee2e6);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            max-height: 260px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-            .ia-response-box.expanded {
-                max-height: none;
-                overflow-y: visible;
-            }
-    </style>
 }
