@@ -33,14 +33,21 @@
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
         <strong>Resposta da IA</strong>
-        <button id="btnIa" type="button" class="btn btn-sm btn-primary">
-            <i class="bi bi-robot me-1"></i> Gerar resposta com IA
-        </button>
+        <div class="d-flex align-items-center gap-2">
+            <button id="ia-expand-toggle" type="button" class="btn btn-link btn-sm text-decoration-none d-none" aria-expanded="false">
+                <i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta
+            </button>
+            <button id="btnIa" type="button" class="btn btn-sm btn-primary">
+                <i class="bi bi-robot me-1"></i> Gerar resposta com IA
+            </button>
+        </div>
     </div>
     <div class="card-body">
-        <pre id="iaText" class="mb-0" style="white-space: pre-wrap;">@Model.Ticket?.RespostaIA</pre>
+        <div id="ia-response-box" class="ia-response-box">
+            <pre id="iaText" class="mb-0">@Model.Ticket?.RespostaIA</pre>
+        </div>
     </div>
 </div>
 
@@ -48,11 +55,30 @@
     <script>
         const btnIa = document.getElementById('btnIa');
         const preIa = document.getElementById('iaText');
+        const iaResponseBox = document.getElementById('ia-response-box');
+        const iaExpandToggle = document.getElementById('ia-expand-toggle');
+
+        const resetExpandToggle = (showToggle) => {
+            if (!iaExpandToggle || !iaResponseBox) return;
+
+            iaResponseBox.classList.remove('expanded');
+            iaExpandToggle.classList.toggle('d-none', !showToggle);
+            iaExpandToggle.setAttribute('aria-expanded', 'false');
+            iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+        };
+
+        const hydrateInitialState = () => {
+            const hasContent = Boolean(preIa?.textContent?.trim());
+            resetExpandToggle(hasContent);
+        };
+
+        hydrateInitialState();
 
         btnIa?.addEventListener('click', async () => {
             btnIa.disabled = true;
             btnIa.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando...';
             preIa.textContent = 'Gerando resposta da IA...';
+            resetExpandToggle(false);
 
             try {
                 const response = await fetch('/api/ticketsapi/@Model.Ticket?.Id/responder', {
@@ -62,11 +88,28 @@
 
                 const data = await response.json();
                 preIa.textContent = data.respostaIA || 'A IA não retornou uma resposta.';
+                const hasContent = Boolean(data.respostaIA && data.respostaIA.trim().length);
+                resetExpandToggle(hasContent);
             } catch (err) {
                 preIa.textContent = 'Erro ao consultar a IA.';
+                resetExpandToggle(false);
             } finally {
                 btnIa.disabled = false;
                 btnIa.innerHTML = '<i class="bi bi-robot me-1"></i> Gerar resposta com IA';
+            }
+        });
+
+        iaExpandToggle?.addEventListener('click', () => {
+            if (!iaResponseBox || !iaExpandToggle) return;
+
+            const expanded = iaResponseBox.classList.toggle('expanded');
+            iaExpandToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            iaExpandToggle.innerHTML = expanded
+                ? '<i class="bi bi-arrows-angle-contract me-1"></i>Recolher resposta'
+                : '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+
+            if (expanded) {
+                iaResponseBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     </script>

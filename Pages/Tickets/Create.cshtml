@@ -56,8 +56,13 @@
                             <span>Gerando resposta inteligente...</span>
                         </div>
                         <div id="ia-response" class="d-none mt-4">
-                            <p class="text-muted mb-2">Sugerimos os seguintes passos:</p>
-                            <div class="ia-response-box">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-2 mb-2">
+                                <p class="text-muted mb-0">Sugerimos os seguintes passos:</p>
+                                <button type="button" id="ia-expand-toggle" class="btn btn-link btn-sm text-decoration-none d-none">
+                                    <i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta
+                                </button>
+                            </div>
+                            <div class="ia-response-box" id="ia-response-box">
                                 <div id="ia-response-text" class="mb-0"></div>
                             </div>
                         </div>
@@ -88,12 +93,14 @@
             const iaStatus = document.getElementById('ia-status');
             const iaLoading = document.getElementById('ia-loading');
             const iaResponse = document.getElementById('ia-response');
+            const iaResponseBox = document.getElementById('ia-response-box');
             const iaResponseText = document.getElementById('ia-response-text');
             const iaMeta = document.getElementById('ia-meta');
             const iaDetailsLink = document.getElementById('ia-details-link');
             const generateButton = document.getElementById('generate-ia-button');
             const generateSpinner = document.getElementById('generate-ia-spinner');
             const generateLabel = document.getElementById('generate-ia-label');
+            const iaExpandToggle = document.getElementById('ia-expand-toggle');
 
             let currentTicketId = null;
 
@@ -120,11 +127,17 @@
                 iaStatus.className = 'alert alert-info mb-3';
                 iaLoading.classList.add('d-none');
                 iaResponse.classList.add('d-none');
+                iaResponseBox?.classList.remove('expanded');
                 iaResponseText.textContent = '';
                 iaMeta.classList.add('d-none');
                 iaMeta.textContent = '';
                 iaDetailsLink.classList.add('d-none');
                 iaDetailsLink.removeAttribute('href');
+                if (iaExpandToggle) {
+                    iaExpandToggle.classList.add('d-none');
+                    iaExpandToggle.setAttribute('aria-expanded', 'false');
+                    iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+                }
                 if (generateButton) {
                     generateButton.disabled = true;
                 }
@@ -253,7 +266,13 @@
                     iaStatus.className = 'alert alert-info mb-3';
                     iaStatus.textContent = 'Consultando a IA, aguarde alguns instantes...';
                     iaResponse.classList.add('d-none');
+                    iaResponseBox?.classList.remove('expanded');
                     iaResponseText.textContent = '';
+                    if (iaExpandToggle) {
+                        iaExpandToggle.classList.add('d-none');
+                        iaExpandToggle.setAttribute('aria-expanded', 'false');
+                        iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+                    }
                     iaLoading.classList.remove('d-none');
                     toggleGenerateLoading(true);
 
@@ -273,7 +292,14 @@
                         const respostaIa = (data?.respostaIA ?? '').trim();
                         iaLoading.classList.add('d-none');
                         iaResponse.classList.remove('d-none');
+                        iaResponseBox?.classList.remove('expanded');
                         iaResponseText.textContent = respostaIa || 'A IA não retornou uma sugestão. Tente novamente em alguns instantes.';
+
+                        if (iaExpandToggle) {
+                            iaExpandToggle.classList.toggle('d-none', !respostaIa);
+                            iaExpandToggle.setAttribute('aria-expanded', 'false');
+                            iaExpandToggle.innerHTML = '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+                        }
 
                         iaStatus.className = 'alert alert-success mb-3';
                         iaStatus.textContent = 'Resposta gerada com sucesso!';
@@ -296,6 +322,19 @@
                     }
                 });
             }
+            iaExpandToggle?.addEventListener('click', () => {
+                if (!iaResponseBox) return;
+
+                const expanded = iaResponseBox.classList.toggle('expanded');
+                iaExpandToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                iaExpandToggle.innerHTML = expanded
+                    ? '<i class="bi bi-arrows-angle-contract me-1"></i>Recolher resposta'
+                    : '<i class="bi bi-arrows-fullscreen me-1"></i>Expandir resposta';
+
+                if (expanded) {
+                    iaResponseBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         });
     </script>
 }
@@ -312,5 +351,10 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
+
+            .ia-response-box.expanded {
+                max-height: none;
+                overflow-y: visible;
+            }
     </style>
 }

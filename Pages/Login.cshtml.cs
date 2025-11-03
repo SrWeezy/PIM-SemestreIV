@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using PIMIV.Data;
 using PIMIV.Models;
 using System.Linq;
@@ -26,15 +27,34 @@ namespace PIMIV.Pages
         public string SucessoCadastro { get; set; } = "";
         public string ActiveTab { get; set; } = "login";
 
-        public async Task<IActionResult> OnGetAsync(bool logout = false)
+        [TempData]
+        public string? MensagemErroLogin { get; set; }
+        [TempData]
+        public string? EmailTentativa { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(bool logout = false, bool trocar = false)
         {
-            if (logout)
+            if (logout || trocar)
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                MensagemSucesso = "Você saiu da sua conta.";
+                MensagemSucesso = trocar
+                    ? "Você pode entrar com outra conta agora."
+                    : "Você saiu da sua conta.";
             }
 
-            if (User?.Identity?.IsAuthenticated == true && !logout)
+            if (!string.IsNullOrEmpty(MensagemErroLogin))
+            {
+                Mensagem = MensagemErroLogin;
+                MensagemErroLogin = null;
+            }
+
+            if (!string.IsNullOrEmpty(EmailTentativa))
+            {
+                Email = EmailTentativa;
+                EmailTentativa = null;
+            }
+
+            if (User?.Identity?.IsAuthenticated == true && !logout && !trocar)
             {
                 return RedirectToPage("/Tickets/Index");
             }
@@ -50,8 +70,9 @@ namespace PIMIV.Pages
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == Email && u.Senha == Senha);
             if (usuario == null)
             {
-                Mensagem = "Usuário ou senha incorretos!";
-                return Page();
+                MensagemErroLogin = "Email ou senha incorretos.";
+                EmailTentativa = Email;
+                return RedirectToPage();
             }
 
             var claims = new List<Claim>
@@ -69,26 +90,41 @@ namespace PIMIV.Pages
             return RedirectToPage("/Tickets/Index");
         }
 
-        public IActionResult OnPostCadastrar()
+        public async Task<IActionResult> OnPostCadastrarAsync()
         {
             ActiveTab = "cadastro";
-            var jaExiste = _context.Usuarios.Any(u => u.Email == EmailCadastro);
-            if (jaExiste)
+
+            var email = (EmailCadastro ?? string.Empty).Trim();
+            var senha = (SenhaCadastro ?? string.Empty).Trim();
+            var nome = (NomeCadastro ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
             {
-                MensagemCadastro = "Já existe um usuário com este email.";
+                MensagemCadastro = "Informe um e-mail e uma senha.";
                 return Page();
             }
+
+            var jaExiste = _context.Usuarios.Any(u => u.Email == email);
+            if (jaExiste)
+            {
+                MensagemCadastro = "Já existe um usuário com este e-mail.";
+                return Page();
+            }
+
             var novo = new Usuario
             {
-                Nome = NomeCadastro,
-                Email = EmailCadastro,
-                Senha = SenhaCadastro
+                Nome = nome,
+                Email = email,
+                Senha = senha
             };
+
             _context.Usuarios.Add(novo);
-            _context.SaveChanges();
-            SucessoCadastro = "Cadastro realizado. Agora você pode entrar.";
+            await _context.SaveChangesAsync();
+
+            SucessoCadastro = "Conta criada com sucesso. Faça login.";
             ActiveTab = "login";
-            Email = EmailCadastro;
+            Email = email;
+
             return Page();
         }
     }
