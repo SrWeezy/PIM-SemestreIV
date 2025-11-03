@@ -47,15 +47,13 @@ namespace PIMIV.Controllers
             }
 
             ticket.DataAbertura = DateTime.UtcNow;
+            ticket.Status = TicketStatus.Aberto;
+            ticket.RespostaIA = null;
+
             _context.Tickets.Add(ticket);
-
-            var respostaIa = await ObterRespostaIA(ticket.Titulo, ticket.Descricao);
-
-            ticket.RespostaIA = respostaIa;
-            ticket.Status = TicketStatus.Fechado;
             await _context.SaveChangesAsync();
 
-            return Ok(new { Mensagem = "Ticket aberto com sucesso!", Ticket = ticket, RespostaIA = respostaIa });
+            return Ok(new { Mensagem = "Ticket aberto com sucesso!", Ticket = ticket, RespostaIA = (string?)null });
         }
 
         [HttpPost("{id}/responder")]
@@ -83,7 +81,7 @@ namespace PIMIV.Controllers
                 client.Timeout = TimeSpan.FromSeconds(30);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiApiKey);
 
-                // Use um modelo ativo (gpt-4o-mini é leve e atual)
+                
                 var body = new
                 {
                     model = "gpt-4o-mini",

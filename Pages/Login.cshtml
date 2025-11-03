@@ -31,6 +31,10 @@
                 {
                     <div class="alert alert-danger py-2">@Model.Mensagem</div>
                 }
+                @if (!string.IsNullOrEmpty(Model.MensagemSucesso))
+                {
+                    <div class="alert alert-success py-2">@Model.MensagemSucesso</div>
+                }
                 <form method="post" asp-page-handler="Entrar">
                     <div class="mb-3">
                         <label class="form-label">Email</label>
